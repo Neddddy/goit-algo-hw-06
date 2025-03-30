@@ -13,9 +13,12 @@ class Name(Field):
 
 class Phone(Field):
     def __init__(self, value):
+        super().__init__(self.validate(value))  
+
+    def validate(value):
         if not re.fullmatch(r"^\d{10}$", value):
             raise ValueError("Invalid phone number format")
-        super().__init__(value)
+        return value  
 
 class Record:
     def __init__(self, name):
@@ -26,35 +29,35 @@ class Record:
         self.phones.append(Phone(phone))
 
     def remove_phone(self, phone):
-        for p in self.phones:
-            if p.value == phone:
-                self.phones.remove(p)
-                break
-    
+        phone_obj = self.find_phone(phone)
+        if phone_obj:
+            self.phones.remove(phone_obj)
+
     def edit_phone(self, phone0, phone1):
-        for p in self.phones:
-            if p.value == phone0:
-                self.phones.remove(p)
-                self.add_phone(phone1) 
-                return
-        raise ValueError("Phone number not found")
+        phone_obj = self.find_phone(phone0)
+        if phone_obj:
+            new_phone = Phone(phone1)  
+            self.remove_phone(phone0)
+            self.phones.append(new_phone)
+        else:
+            raise ValueError("Phone number not found")
 
     def find_phone(self, phone):
         for p in self.phones:
             if p.value == phone:
                 return p
         return None
-             
+
     def __str__(self):
         return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}"
 
 class AddressBook(UserDict):
     def add_record(self, record):
         self.data[record.name.value] = record
-    
+
     def find(self, name):
         return self.data.get(name, None)
-    
+
     def delete(self, name):
         if name in self.data:
             del self.data[name]
@@ -90,4 +93,3 @@ if found_phone:
 
 book.delete("Jane")
 print(book)
-
