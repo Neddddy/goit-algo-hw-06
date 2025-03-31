@@ -15,6 +15,7 @@ class Phone(Field):
     def __init__(self, value):
         super().__init__(self.validate(value))  
 
+    @staticmethod
     def validate(value):
         if not re.fullmatch(r"^\d{10}$", value):
             raise ValueError("Invalid phone number format")
